@@ -568,6 +568,25 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <div class="share-container">
+          <button class="share-button" aria-label="Share this activity">
+            <span>🔗</span> Share
+          </button>
+          <div class="share-options hidden">
+            <a class="share-option share-twitter" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on X (Twitter)">
+              <span>𝕏</span> X (Twitter)
+            </a>
+            <a class="share-option share-facebook" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
+              <span>📘</span> Facebook
+            </a>
+            <a class="share-option share-whatsapp" href="#" target="_blank" rel="noopener noreferrer" aria-label="Share on WhatsApp">
+              <span>💬</span> WhatsApp
+            </a>
+            <button class="share-option share-copy" aria-label="Copy link">
+              <span>📋</span> Copy Link
+            </button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -587,8 +606,54 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Add share button functionality
+    const shareButton = activityCard.querySelector(".share-button");
+    const shareOptions = activityCard.querySelector(".share-options");
+    shareButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      // Close any other open share menus
+      document.querySelectorAll(".share-options").forEach((el) => {
+        if (el !== shareOptions) el.classList.add("hidden");
+      });
+      shareOptions.classList.toggle("hidden");
+    });
+
+    // Build share URLs
+    const activityUrl = `${window.location.origin}${window.location.pathname}?activity=${encodeURIComponent(name)}`;
+    const shareText = `Check out this activity at Mergington High School: ${name} - ${details.description}`;
+
+    activityCard.querySelector(".share-twitter").href =
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(activityUrl)}`;
+    activityCard.querySelector(".share-facebook").href =
+      `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activityUrl)}`;
+    activityCard.querySelector(".share-whatsapp").href =
+      `https://wa.me/?text=${encodeURIComponent(shareText + " " + activityUrl)}`;
+
+    activityCard.querySelector(".share-copy").addEventListener("click", () => {
+      navigator.clipboard.writeText(activityUrl).then(() => {
+        const copyBtn = activityCard.querySelector(".share-copy");
+        copyBtn.textContent = "✅ Copied!";
+        setTimeout(() => {
+          copyBtn.innerHTML = "<span>📋</span> Copy Link";
+        }, 2000);
+      }).catch(() => {
+        const copyBtn = activityCard.querySelector(".share-copy");
+        copyBtn.textContent = "❌ Copy failed";
+        setTimeout(() => {
+          copyBtn.innerHTML = "<span>📋</span> Copy Link";
+        }, 2000);
+      });
+    });
+
     activitiesList.appendChild(activityCard);
   }
+
+  // Close share menus when clicking outside
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".share-options").forEach((el) => {
+      el.classList.add("hidden");
+    });
+  });
 
   // Event listeners for search and filter
   searchInput.addEventListener("input", (event) => {
